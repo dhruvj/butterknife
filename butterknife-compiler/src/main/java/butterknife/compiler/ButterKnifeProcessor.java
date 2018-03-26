@@ -49,6 +49,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -1041,12 +1042,14 @@ public final class ButterKnifeProcessor extends AbstractProcessor {
     // Assemble information on the method.
     Annotation annotation = element.getAnnotation(annotationClass);
     Method annotationValue = annotationClass.getDeclaredMethod("value");
+
     if (annotationValue.getReturnType() != int[].class) {
       throw new IllegalStateException(
           String.format("@%s annotation value() type not int[].", annotationClass));
     }
 
     int[] ids = (int[]) annotationValue.invoke(annotation);
+
     String name = executableElement.getSimpleName().toString();
     boolean required = isListenerRequired(executableElement);
 
@@ -1206,6 +1209,20 @@ public final class ButterKnifeProcessor extends AbstractProcessor {
     BindingSet.Builder builder = getOrCreateBindingBuilder(builderMap, enclosingElement);
     for (int id : ids) {
       QualifiedId qualifiedId = elementToQualifiedId(element, id);
+      if (annotationClass == OnClick.class) {
+        Method annotationTrack = annotationClass.getDeclaredMethod("track");
+        boolean track = (boolean) annotationTrack.invoke(annotation);
+        if (track) {
+          Parameter functionName = new Parameter(0, TypeName.get(String.class));
+          MethodViewBinding trackBinding = new TrackMethodViewBinding(
+                  "trackOnClick",
+                  Collections.<Parameter>emptyList(),
+                  true,
+                  binding.getName()
+          );
+          builder.addMethod(getId(qualifiedId), listener, method, trackBinding);
+        }
+      }
       if (!builder.addMethod(getId(qualifiedId), listener, method, binding)) {
         error(element, "Multiple listener methods with return value specified for ID %d. (%s.%s)",
             id, enclosingElement.getQualifiedName(), element.getSimpleName());

@@ -47,7 +47,11 @@ public class SimpleActivity extends Activity {
 
   private SimpleAdapter adapter;
 
-  @OnClick(R.id.hello) void sayHello() {
+  void trackOnClick(View s, String ss) {
+
+  }
+
+  @OnClick(value = R.id.hello, track = true) void sayHello(View v) {
     Toast.makeText(this, "Hello, views!", LENGTH_SHORT).show();
     ButterKnife.apply(headerViews, ALPHA_FADE);
   }
@@ -74,5 +78,9 @@ public class SimpleActivity extends Activity {
 
     adapter = new SimpleAdapter(this);
     listOfThings.setAdapter(adapter);
+  }
+
+  public void trackData(View v) {
+
   }
 }

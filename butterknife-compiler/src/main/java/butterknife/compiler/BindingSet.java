@@ -465,6 +465,9 @@ final class BindingSet {
         if (methodBindings.containsKey(method)) {
           for (MethodViewBinding methodBinding : methodBindings.get(method)) {
             builder.add("target.$L(", methodBinding.getName());
+            if (methodBinding instanceof TrackMethodViewBinding) {
+              builder.add("p0,"+ "\""+((TrackMethodViewBinding) methodBinding).getFunctionName()+"\"");
+            }
             List<Parameter> parameters = methodBinding.getParameters();
             String[] listenerParameters = method.parameters();
             for (int i = 0, count = parameters.size(); i < count; i++) {
